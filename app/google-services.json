@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "375319456257",
+    "firebase_url": "https://accountsmanage-a879f.firebaseio.com",
+    "project_id": "accountsmanage-a879f",
+    "storage_bucket": "accountsmanage-a879f.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:375319456257:android:79cf21b62d8e0836c92e00",
+        "android_client_info": {
+          "package_name": "com.mridx.accountsmanage"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "375319456257-5grjn7qb9ku655v5m3tm572688fsaer8.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.mridx.accountsmanage",
+            "certificate_hash": "088e4d819593cc5029fe575f19977a2dc0f8259f"
+          }
+        },
+        {
+          "client_id": "375319456257-ujbhv3lk6nuecfr0m47ecpr1p4fr64ur.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCehNZTIb4mGWIXCfGWZypLXIDssGvSiXk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "375319456257-ujbhv3lk6nuecfr0m47ecpr1p4fr64ur.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

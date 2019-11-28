@@ -1,6 +1,7 @@
 package com.mridx.accountsmanage.fragment;
 
 import android.content.Context;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -27,6 +28,7 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.UserInfo;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -70,7 +72,7 @@ public class Dashboard extends Fragment {
 
 
         nameView = view.findViewById(R.id.nameView);
-        nameView.setText("Mr. " + new NameExtractor().getLastName(user.getDisplayName()));
+        nameView.setText(new NameExtractor().getLastName(user.getDisplayName()));
         totalExpensesHeading = view.findViewById(R.id.totalExpensesHeading);
         totalToPaidHeading = view.findViewById(R.id.totalToPaidHeading);
         totalToRecieveHeading = view.findViewById(R.id.totalToReceivedHeading);
@@ -88,8 +90,15 @@ public class Dashboard extends Fragment {
         addToPaid = view.findViewById(R.id.addToPaid);
         addToReceieve = view.findViewById(R.id.addToReceive);
 
+
         addExpenses.setOnClickListener(v -> newExpenses());
+
+        getDatas();
     }
+
+    private void getDatas() {
+    }
+
 
     private void newExpenses() {
 

@@ -1,6 +1,7 @@
 package com.mridx.accountsmanage.fragment;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
@@ -20,6 +21,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.appcompat.widget.AppCompatImageView;
 import androidx.appcompat.widget.AppCompatTextView;
+import androidx.cardview.widget.CardView;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 
@@ -38,6 +40,7 @@ import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.mridx.accountsmanage.NameExtractor;
 import com.mridx.accountsmanage.R;
+import com.mridx.accountsmanage.activity.TotalExpenses;
 
 import java.util.Arrays;
 import java.util.Calendar;
@@ -60,6 +63,8 @@ public class Dashboard extends Fragment {
 
     private int month;
     private Calendar calendar;
+
+    private CardView card1, card2, card3;
 
     @Nullable
     @Override
@@ -99,6 +104,13 @@ public class Dashboard extends Fragment {
         addExpenses = view.findViewById(R.id.addExpenses);
         addToPaid = view.findViewById(R.id.addToPaid);
         addToReceieve = view.findViewById(R.id.addToReceive);
+
+
+        card1 = view.findViewById(R.id.card1);
+        card2 = view.findViewById(R.id.card2);
+        card3 = view.findViewById(R.id.card3);
+
+        card1.setOnClickListener(v -> startActivity(new Intent(getActivity(), TotalExpenses.class)));
 
 
         addExpenses.setOnClickListener(v -> newExpenses());

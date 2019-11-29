@@ -9,13 +9,13 @@
     </style>
 
 
-    <style name="AppTheme.MyFullScreen" parent="Theme.AppCompat.Light.NoActionBar" >
+    <style name="AppTheme.MyFullScreen" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="windowNoTitle">true</item>
         <item name="android:statusBarColor">@color/colorPrimary</item>
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
-    <style name="AppTheme.BottomNavMenu" parent="Theme.AppCompat.Light.NoActionBar" >
+    <style name="AppTheme.BottomNavMenu" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="windowNoTitle">true</item>
         <item name="android:statusBarColor">@color/colorPrimary</item>
         <item name="colorAccent">@color/colorAccent</item>
@@ -30,6 +30,14 @@
         <item name="colorAccent">#ffffff</item>
     </style>
 
+    <style name="AppTheme.MyFullScreen.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="AppTheme.MyFullScreen.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="AppTheme.MyFullScreen.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
 
 </resources>

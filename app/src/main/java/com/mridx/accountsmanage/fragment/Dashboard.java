@@ -5,6 +5,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,18 +25,22 @@ import androidx.fragment.app.Fragment;
 
 import com.airbnb.lottie.LottieAnimationView;
 import com.chivorn.smartmaterialspinner.SmartMaterialSpinner;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserInfo;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.mridx.accountsmanage.NameExtractor;
 import com.mridx.accountsmanage.R;
 
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -52,6 +57,9 @@ public class Dashboard extends Fragment {
     private FirebaseFirestore firestore;
     private FirebaseAuth auth;
     private FirebaseUser user;
+
+    private int month;
+    private Calendar calendar;
 
     @Nullable
     @Override
@@ -70,6 +78,8 @@ public class Dashboard extends Fragment {
 
         String name = user.getDisplayName();
 
+        calendar = Calendar.getInstance();
+        month = calendar.get(Calendar.MONTH) + 1;
 
         nameView = view.findViewById(R.id.nameView);
         nameView.setText(new NameExtractor().getLastName(user.getDisplayName()));
@@ -97,6 +107,41 @@ public class Dashboard extends Fragment {
     }
 
     private void getDatas() {
+
+        DocumentReference documentReference = firestore.collection("users").document("uuid")
+                .collection("expenses")
+                .document("currentMonth");
+        documentReference.get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        DocumentSnapshot documentSnapshot = task.getResult();
+                        if (documentSnapshot.exists()) {
+                            Log.d("kaku", "getDatas: " + documentSnapshot.get("month").toString());
+                            if (documentSnapshot.get("month").toString().equalsIgnoreCase(String.valueOf(month))) {
+                                String expenses = documentSnapshot.get("expenses").toString();
+                                totalExpenses.setText(expenses);
+                            } else {
+                                totalExpenses.setText("0.00");
+                            }
+                        }
+                    }
+                })
+                .addOnFailureListener(e -> Log.d("kaku", "getDatas: Failed"));
+
+        documentReference.addSnapshotListener((documentSnapshot, e) -> {
+            if (e != null) {
+                Log.d("kaku", "getDatas: Failed to realtime sync");
+            }
+            if (documentSnapshot != null && documentSnapshot.exists()) {
+                if (documentSnapshot.get("month").toString().equalsIgnoreCase(String.valueOf(month))) {
+                    String expenses = documentSnapshot.get("expenses").toString();
+                    totalExpenses.setText(expenses);
+                } else {
+                    totalExpenses.setText("0.00");
+                }
+            }
+        });
+
     }
 
 
@@ -172,6 +217,7 @@ public class Dashboard extends Fragment {
     }
 
     private void uploadExpense(AlertDialog alertDialog) {
+
         ProgressBar mainProgressbar = alertDialog.findViewById(R.id.mainProgressbar);
         ConstraintLayout layout1 = alertDialog.findViewById(R.id.layout1);
         ConstraintLayout layout2 = alertDialog.findViewById(R.id.layout2);
@@ -200,8 +246,55 @@ public class Dashboard extends Fragment {
                     alertDialog.setCancelable(true);
                 })
                 .addOnFailureListener(e -> Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_SHORT).show());
+
+        updateMonthlyExpenses(amount);
     }
 
+    private void updateMonthlyExpenses(String amount) {
+        firestore.collection("users").document("uuid")
+                .collection("expenses")
+                .document("currentMonth")
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                        if (task.isSuccessful()) {
+                            DocumentSnapshot documentSnapshot = task.getResult();
+                            if (documentSnapshot.exists()) {
+                                String expenses = documentSnapshot.get("expenses").toString();
+                                int uploadableExpenses = 0;
+                                if (documentSnapshot.get("month").toString().equalsIgnoreCase(String.valueOf(month))) {
+                                    uploadableExpenses = Integer.parseInt(amount) + Integer.parseInt(expenses);
+                                } else {
+                                    uploadableExpenses = 0;
+                                }
+                                uploadMonthlyExpenses(uploadableExpenses);
+                            } else {
+                                uploadMonthlyExpenses(Integer.parseInt(amount));
+                            }
+                        }
+                    }
+                })
+                .addOnFailureListener(e -> Toast.makeText(getActivity(), "Failed !", Toast.LENGTH_SHORT).show());
+
+    }
+
+    private void uploadMonthlyExpenses(int uploadableExpenses) {
+        Map<String, Object> expenses = new HashMap<>();
+        expenses.put("expenses", uploadableExpenses);
+        expenses.put("month", month);
+        firestore.collection("users").document("uuid")
+                .collection("expenses")
+                .document("currentMonth")
+                .set(expenses)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Toast.makeText(getActivity(), "monthly expenses uploaded !", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .addOnFailureListener(e -> Toast.makeText(getActivity(), "Failed", Toast.LENGTH_SHORT).show());
+    }
 
     public void hideKeyboard(View v) {
         try {

@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    tools:context=".activity.TotalExpenses">
+    >
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/app_bar"
@@ -27,7 +27,7 @@
             <androidx.appcompat.widget.AppCompatTextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Total Expenses For The Month of November"
+                android:text="View Your Expenses "
                 android:textSize="24sp"
                 android:textColor="@color/white"
                 android:layout_gravity="center_vertical"
@@ -47,17 +47,6 @@
         </com.google.android.material.appbar.CollapsingToolbarLayout>
     </com.google.android.material.appbar.AppBarLayout>
 
-    <include layout="@layout/total_expenses_bottom" />
-
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fab"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/fab_margin"
-        app:layout_anchor="@id/app_bar"
-        app:layout_anchorGravity="bottom|end"
-        app:srcCompat="@drawable/ic_add1"
-        app:backgroundTint="@color/colorPrimaryDark"
-        />
+    <include layout="@layout/total_expenses_front_bottom" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -4,12 +4,12 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.AppCompatTextView;
-import androidx.appcompat.widget.Toolbar;
+import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -17,29 +17,25 @@ import com.mridx.accountsmanage.R;
 
 import java.util.ArrayList;
 
-public class TotalExpenses extends AppCompatActivity {
 
-    private Toolbar toolbar;
-    
+public class TotalExpensesByDate extends AppCompatActivity {
+
+    private CardView topCard;
+
     private RecyclerView totalExpensesHolder;
-
     private ArrayList<String> some = new ArrayList<>();
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.total_expenses);
-
-      /*  toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setTitle(null);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);*/
+        setContentView(R.layout.expenses_by_date);
         
-        
+        topCard = findViewById(R.id.topcard);
+        topCard.setOnClickListener(v -> Toast.makeText(this, "Card Cliked !", Toast.LENGTH_SHORT).show());
         totalExpensesHolder = findViewById(R.id.totalExpensesHolder);
-        
+
         PopulateView();
-        
+
     }
 
     private void PopulateView() {
@@ -76,11 +72,11 @@ public class TotalExpenses extends AppCompatActivity {
         @Override
         public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.expense_view, null);
-            return new MyViewHolder(view);
+            return new SomeAdapter.MyViewHolder(view);
         }
 
         @Override
-        public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
+        public void onBindViewHolder(@NonNull SomeAdapter.MyViewHolder holder, int position) {
             //holder.nameView.setText(some.get(position));
         }
 

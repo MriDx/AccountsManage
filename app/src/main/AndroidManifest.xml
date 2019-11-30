@@ -23,6 +23,8 @@
         <activity android:name=".activity.HomeUI" />
         <activity android:name=".activity.SignupUI" />
         <activity android:name=".activity.TotalExpenses" />
+        <activity android:name=".activity.TotalExpensesFront" />
+        <activity android:name=".activity.TotalExpensesByDate" />
     </application>
 
 </manifest>

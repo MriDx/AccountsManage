@@ -41,6 +41,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.mridx.accountsmanage.NameExtractor;
 import com.mridx.accountsmanage.R;
 import com.mridx.accountsmanage.activity.TotalExpenses;
+import com.mridx.accountsmanage.activity.TotalExpensesFront;
 
 import java.util.Arrays;
 import java.util.Calendar;
@@ -110,7 +111,7 @@ public class Dashboard extends Fragment {
         card2 = view.findViewById(R.id.card2);
         card3 = view.findViewById(R.id.card3);
 
-        card1.setOnClickListener(v -> startActivity(new Intent(getActivity(), TotalExpenses.class)));
+        card1.setOnClickListener(v -> startActivity(new Intent(getActivity(), TotalExpensesFront.class)));
 
 
         addExpenses.setOnClickListener(v -> newExpenses());

@@ -52,20 +52,20 @@
 
 
             <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/typeView"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
                 android:layout_marginTop="16dp"
+                android:layout_marginEnd="4dp"
+                android:gravity="center"
                 android:text="Purchase"
                 android:textSize="16sp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/divider4"
                 app:layout_constraintStart_toEndOf="@+id/divider3"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.0"
-                android:layout_marginStart="4dp"
-                android:layout_marginEnd="4dp"
-                android:gravity="center"
-                />
+                app:layout_constraintVertical_bias="0.0" />
 
             <View
                 android:id="@+id/divider4"
@@ -75,12 +75,12 @@
                 android:background="@android:color/transparent"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.7"
+                app:layout_constraintHorizontal_bias="0.66"
                 app:layout_constraintStart_toEndOf="@+id/divider3"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <androidx.appcompat.widget.AppCompatTextView
-                android:id="@+id/textView"
+                android:id="@+id/amountView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="4dp"
@@ -90,7 +90,7 @@
                 android:textSize="16sp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintHorizontal_bias="1.0"
                 app:layout_constraintStart_toEndOf="@+id/divider4"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintVertical_bias="0.0" />

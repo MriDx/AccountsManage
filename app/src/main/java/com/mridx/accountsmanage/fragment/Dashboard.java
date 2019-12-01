@@ -37,9 +37,10 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.mridx.accountsmanage.NameExtractor;
+import com.mridx.accountsmanage.lib.NameExtractor;
 import com.mridx.accountsmanage.R;
 import com.mridx.accountsmanage.activity.TotalExpensesFront;
+import com.mridx.accountsmanage.lib.PercentageCalculator;
 
 import java.util.Arrays;
 import java.util.Calendar;
@@ -64,6 +65,8 @@ public class Dashboard extends Fragment {
     private Calendar calendar;
 
     private CardView card1, card2, card3;
+
+    private String prevExpenses;
 
     @Nullable
     @Override
@@ -119,6 +122,10 @@ public class Dashboard extends Fragment {
 
     private void getDatas() {
 
+        /**
+         * get data for showing total expenses for the month and the higher or lower status
+         */
+
         DocumentReference documentReference = firestore.collection("users").document("uuid")
                 .collection("expenses")
                 .document("currentMonth");
@@ -129,7 +136,10 @@ public class Dashboard extends Fragment {
                         if (documentSnapshot.exists()) {
                             if (documentSnapshot.get("currentMonth").toString().equalsIgnoreCase(String.valueOf(month))) {
                                 String expenses = documentSnapshot.get("currentMonthExpenses").toString();
-                                totalExpenses.setText(expenses);
+                                expenses = new PercentageCalculator().getDecimial(expenses);
+                                totalExpenses.setText("\u20B9" + expenses);
+                                this.prevExpenses = documentSnapshot.get("previousMonthExpenses").toString();
+                                calculatePercentage(expenses);
                             } else {
                                 totalExpenses.setText("0.00");
                             }
@@ -147,7 +157,11 @@ public class Dashboard extends Fragment {
             if (documentSnapshot != null && documentSnapshot.exists()) {
                 if (documentSnapshot.get("currentMonth").toString().equalsIgnoreCase(String.valueOf(month))) {
                     String expenses = documentSnapshot.get("currentMonthExpenses").toString();
-                    totalExpenses.setText(expenses);
+                    expenses = new PercentageCalculator().getDecimial(expenses);
+                    totalExpenses.setText("\u20B9" + expenses);
+                    this.prevExpenses = documentSnapshot.get("previousMonthExpenses").toString();
+                    this.prevExpenses = new PercentageCalculator().getDecimial(this.prevExpenses);
+                    calculatePercentage(expenses);
                 } else {
                     totalExpenses.setText("0.00");
                 }
@@ -157,8 +171,26 @@ public class Dashboard extends Fragment {
 
     }
 
+    private void calculatePercentage(String totalExpenses) {
+        Log.d("kaku", "calculatePercentage: " + totalExpenses + " vs " +prevExpenses);
+
+        Float percent = new PercentageCalculator(prevExpenses, totalExpenses).getPercentage();
+        String status = null;
+        if (String.valueOf(percent).startsWith("-")) {
+            status = String.valueOf(percent).replace("-", "") + "% lower than previous month";
+        } else {
+            status = String.valueOf(percent) + "% higher than previous month";
+        }
+        expensesStatus.setText(status);
+
+    }
+
 
     private void newExpenses() {
+
+        /**
+         * adding new expenses
+         */
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setView(R.layout.new_expenses);
@@ -167,7 +199,6 @@ public class Dashboard extends Fragment {
         List<String> types = Arrays.asList(getResources().getStringArray(R.array.expenseTypes));
         SmartMaterialSpinner typeSelector = alertDialog.findViewById(R.id.typeSelector);
         typeSelector.setItem(types);
-        //addListener(typeSelector, types, alertDialog);
         TextInputEditText amountField = alertDialog.findViewById(R.id.amountField);
         TextInputEditText descriptionField = alertDialog.findViewById(R.id.descriptionField);
         AppCompatButton submitExpense = alertDialog.findViewById(R.id.submitExpenses);
@@ -231,6 +262,7 @@ public class Dashboard extends Fragment {
 
     private void uploadExpense(AlertDialog alertDialog) {
 
+
         ProgressBar mainProgressbar = alertDialog.findViewById(R.id.mainProgressbar);
         ConstraintLayout layout1 = alertDialog.findViewById(R.id.layout1);
         ConstraintLayout layout2 = alertDialog.findViewById(R.id.layout2);
@@ -277,16 +309,16 @@ public class Dashboard extends Fragment {
                                 Log.d("kaku", "onComplete: " + documentSnapshot.getData());
                                 String expenses = documentSnapshot.get("currentMonthExpenses").toString();
                                 Log.d("kaku", "onComplete: prev exp " + expenses);
-                                int currentMonth = 0, prevMonth = 0;
+                                float currentMonth = 0, prevMonth = 0;
                                 boolean uploadPrev = false;
                                 if (documentSnapshot.get("currentMonth").toString().equalsIgnoreCase(String.valueOf(month))) {
-                                    currentMonth = Integer.parseInt(amount) + Integer.parseInt(expenses);
+                                    currentMonth = Float.parseFloat(amount) + Float.parseFloat(expenses);
                                     prevMonth = 0;
                                     uploadPrev = false;
                                 } else {
                                     //createPrevMonth(expenses, month);
-                                    currentMonth = Integer.parseInt(amount);
-                                    prevMonth = Integer.parseInt(expenses);
+                                    currentMonth = Float.parseFloat(amount);
+                                    prevMonth = Float.parseFloat(expenses);
                                     uploadPrev = true;
                                 }
                                 uploadMonthlyExpenses(currentMonth, prevMonth, uploadPrev); // for new month
@@ -300,7 +332,7 @@ public class Dashboard extends Fragment {
 
     }
 
-    private void createPrevMonth(String expenses, int month) {
+    /*private void createPrevMonth(String expenses, int month) {
         Map<String, Object> data = new HashMap<>();
         data.put("expenses", expenses);
         data.put("month", month -1);
@@ -315,9 +347,9 @@ public class Dashboard extends Fragment {
                     }
                 })
                 .addOnFailureListener(e -> Toast.makeText(getActivity(), "Failed", Toast.LENGTH_SHORT).show());
-    }
+    }*/
 
-    private void uploadMonthlyExpenses(int currentMonth, int prevMonth, boolean uploadPrev) {
+    private void uploadMonthlyExpenses(float currentMonth, float prevMonth, boolean uploadPrev) {
         Map<String, Object> expenses = new HashMap<>();
         expenses.put("currentMonthExpenses", currentMonth);
         expenses.put("currentMonth", month);

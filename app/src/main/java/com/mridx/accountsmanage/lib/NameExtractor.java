@@ -1,4 +1,4 @@
-package com.mridx.accountsmanage;
+package com.mridx.accountsmanage.lib;
 
 public class NameExtractor {
 

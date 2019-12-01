@@ -2,7 +2,6 @@ package com.mridx.accountsmanage.fragment;
 
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -28,19 +27,18 @@ import androidx.fragment.app.Fragment;
 import com.airbnb.lottie.LottieAnimationView;
 import com.chivorn.smartmaterialspinner.SmartMaterialSpinner;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.auth.UserInfo;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.mridx.accountsmanage.NameExtractor;
 import com.mridx.accountsmanage.R;
-import com.mridx.accountsmanage.activity.TotalExpenses;
 import com.mridx.accountsmanage.activity.TotalExpensesFront;
 
 import java.util.Arrays;
@@ -129,13 +127,14 @@ public class Dashboard extends Fragment {
                     if (task.isSuccessful()) {
                         DocumentSnapshot documentSnapshot = task.getResult();
                         if (documentSnapshot.exists()) {
-                            Log.d("kaku", "getDatas: " + documentSnapshot.get("month").toString());
-                            if (documentSnapshot.get("month").toString().equalsIgnoreCase(String.valueOf(month))) {
-                                String expenses = documentSnapshot.get("expenses").toString();
+                            if (documentSnapshot.get("currentMonth").toString().equalsIgnoreCase(String.valueOf(month))) {
+                                String expenses = documentSnapshot.get("currentMonthExpenses").toString();
                                 totalExpenses.setText(expenses);
                             } else {
                                 totalExpenses.setText("0.00");
                             }
+                        } else {
+                            totalExpenses.setText("0.00");
                         }
                     }
                 })
@@ -146,14 +145,15 @@ public class Dashboard extends Fragment {
                 Log.d("kaku", "getDatas: Failed to realtime sync");
             }
             if (documentSnapshot != null && documentSnapshot.exists()) {
-                if (documentSnapshot.get("month").toString().equalsIgnoreCase(String.valueOf(month))) {
-                    String expenses = documentSnapshot.get("expenses").toString();
+                if (documentSnapshot.get("currentMonth").toString().equalsIgnoreCase(String.valueOf(month))) {
+                    String expenses = documentSnapshot.get("currentMonthExpenses").toString();
                     totalExpenses.setText(expenses);
                 } else {
                     totalExpenses.setText("0.00");
                 }
             }
         });
+
 
     }
 
@@ -274,16 +274,24 @@ public class Dashboard extends Fragment {
                         if (task.isSuccessful()) {
                             DocumentSnapshot documentSnapshot = task.getResult();
                             if (documentSnapshot.exists()) {
-                                String expenses = documentSnapshot.get("expenses").toString();
-                                int uploadableExpenses = 0;
-                                if (documentSnapshot.get("month").toString().equalsIgnoreCase(String.valueOf(month))) {
-                                    uploadableExpenses = Integer.parseInt(amount) + Integer.parseInt(expenses);
+                                Log.d("kaku", "onComplete: " + documentSnapshot.getData());
+                                String expenses = documentSnapshot.get("currentMonthExpenses").toString();
+                                Log.d("kaku", "onComplete: prev exp " + expenses);
+                                int currentMonth = 0, prevMonth = 0;
+                                boolean uploadPrev = false;
+                                if (documentSnapshot.get("currentMonth").toString().equalsIgnoreCase(String.valueOf(month))) {
+                                    currentMonth = Integer.parseInt(amount) + Integer.parseInt(expenses);
+                                    prevMonth = 0;
+                                    uploadPrev = false;
                                 } else {
-                                    uploadableExpenses = 0;
+                                    //createPrevMonth(expenses, month);
+                                    currentMonth = Integer.parseInt(amount);
+                                    prevMonth = Integer.parseInt(expenses);
+                                    uploadPrev = true;
                                 }
-                                uploadMonthlyExpenses(uploadableExpenses);
+                                uploadMonthlyExpenses(currentMonth, prevMonth, uploadPrev); // for new month
                             } else {
-                                uploadMonthlyExpenses(Integer.parseInt(amount));
+                                uploadMonthlyExpenses(Integer.parseInt(amount), 0, true); // for first time
                             }
                         }
                     }
@@ -292,21 +300,59 @@ public class Dashboard extends Fragment {
 
     }
 
-    private void uploadMonthlyExpenses(int uploadableExpenses) {
-        Map<String, Object> expenses = new HashMap<>();
-        expenses.put("expenses", uploadableExpenses);
-        expenses.put("month", month);
+    private void createPrevMonth(String expenses, int month) {
+        Map<String, Object> data = new HashMap<>();
+        data.put("expenses", expenses);
+        data.put("month", month -1);
         firestore.collection("users").document("uuid")
                 .collection("expenses")
-                .document("currentMonth")
-                .set(expenses)
+                .document("prevMonth")
+                .set(data)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-                        Toast.makeText(getActivity(), "monthly expenses uploaded !", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getActivity(), "previous month expenses uploaded !", Toast.LENGTH_SHORT).show();
                     }
                 })
                 .addOnFailureListener(e -> Toast.makeText(getActivity(), "Failed", Toast.LENGTH_SHORT).show());
+    }
+
+    private void uploadMonthlyExpenses(int currentMonth, int prevMonth, boolean uploadPrev) {
+        Map<String, Object> expenses = new HashMap<>();
+        expenses.put("currentMonthExpenses", currentMonth);
+        expenses.put("currentMonth", month);
+        if (uploadPrev) {
+            expenses.put("previousMonthExpenses", prevMonth);
+            expenses.put("previousMonth", month - 1);
+        }
+        final OnFailureListener failed1 = e -> Toast.makeText(getActivity(), "Failed", Toast.LENGTH_SHORT).show();
+        if (uploadPrev) {
+            firestore.collection("users").document("uuid")
+                    .collection("expenses")
+                    .document("currentMonth")
+                    //.update(expenses)
+                    .set(expenses)
+                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            Toast.makeText(getActivity(), "monthly expenses uploaded !", Toast.LENGTH_SHORT).show();
+                        }
+                    })
+                    .addOnFailureListener(failed1);
+        } else {
+            firestore.collection("users").document("uuid")
+                    .collection("expenses")
+                    .document("currentMonth")
+                    .update(expenses)
+                    //.set(expenses)
+                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            Toast.makeText(getActivity(), "monthly expenses uploaded !", Toast.LENGTH_SHORT).show();
+                        }
+                    })
+                    .addOnFailureListener(failed1);
+        }
     }
 
     public void hideKeyboard(View v) {
